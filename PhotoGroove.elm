@@ -1,10 +1,26 @@
 module PhotoGroove exposing (..)
 
+import Array exposing (Array)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 
 
+type alias Photo =
+    { url : String }
+
+
+type alias Model =
+    { photos : List Photo
+    , selectedUrl : String
+    }
+
+
+type alias Msg =
+    { operation : String, data : String }
+
+
+model : Model
 model =
     { photos =
         [ { url = "1.jpeg" }
@@ -15,10 +31,17 @@ model =
     }
 
 
+photoArray : Array Photo
+photoArray =
+    Array.fromList model.photos
+
+
+urlPrefix : String
 urlPrefix =
     "http://elm-in-action.com/"
 
 
+view : Model -> Html Msg
 view model =
     div [ class "content" ]
         [ h1 [] [ text "Photo Groove" ]
@@ -32,6 +55,7 @@ view model =
         ]
 
 
+viewThumbnail : String -> Photo -> Html Msg
 viewThumbnail selectedUrl thumbnail =
     img
         [ src (urlPrefix ++ thumbnail.url)

@@ -8367,8 +8367,20 @@ var _user$project$PhotoGroove$model = {
 	},
 	selectedUrl: '1.jpeg'
 };
+var _user$project$PhotoGroove$photoArray = _elm_lang$core$Array$fromList(_user$project$PhotoGroove$model.photos);
 var _user$project$PhotoGroove$main = _elm_lang$html$Html$beginnerProgram(
 	{model: _user$project$PhotoGroove$model, view: _user$project$PhotoGroove$view, update: _user$project$PhotoGroove$update})();
+var _user$project$PhotoGroove$Photo = function (a) {
+	return {url: a};
+};
+var _user$project$PhotoGroove$Model = F2(
+	function (a, b) {
+		return {photos: a, selectedUrl: b};
+	});
+var _user$project$PhotoGroove$Msg = F2(
+	function (a, b) {
+		return {operation: a, data: b};
+	});
 
 var Elm = {};
 Elm['PhotoGroove'] = Elm['PhotoGroove'] || {};
