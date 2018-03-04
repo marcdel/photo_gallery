@@ -9063,12 +9063,35 @@ var _user$project$PhotoGallery$sizeToString = function (size) {
 	}
 };
 var _user$project$PhotoGallery$urlPrefix = 'http://elm-in-action.com/';
+var _user$project$PhotoGallery$viewLarge = function (maybeUrl) {
+	var _p1 = maybeUrl;
+	if (_p1.ctor === 'Nothing') {
+		return _elm_lang$html$Html$text('');
+	} else {
+		return A2(
+			_elm_lang$html$Html$img,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class('large'),
+				_1: {
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$src(
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							_user$project$PhotoGallery$urlPrefix,
+							A2(_elm_lang$core$Basics_ops['++'], 'large/', _p1._0))),
+					_1: {ctor: '[]'}
+				}
+			},
+			{ctor: '[]'});
+	}
+};
 var _user$project$PhotoGallery$Photo = function (a) {
 	return {url: a};
 };
-var _user$project$PhotoGallery$Model = F3(
-	function (a, b, c) {
-		return {photos: a, selectedUrl: b, chosenSize: c};
+var _user$project$PhotoGallery$Model = F4(
+	function (a, b, c, d) {
+		return {photos: a, selectedUrl: b, loadingError: c, chosenSize: d};
 	});
 var _user$project$PhotoGallery$SetSize = function (a) {
 	return {ctor: 'SetSize', _0: a};
@@ -9077,6 +9100,57 @@ var _user$project$PhotoGallery$SurpriseMe = {ctor: 'SurpriseMe'};
 var _user$project$PhotoGallery$SelectByIndex = function (a) {
 	return {ctor: 'SelectByIndex', _0: a};
 };
+var _user$project$PhotoGallery$update = F2(
+	function (msg, model) {
+		var _p2 = msg;
+		switch (_p2.ctor) {
+			case 'SelectByUrl':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							selectedUrl: _elm_lang$core$Maybe$Just(_p2._0)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'SelectByIndex':
+				var newSelectedUrl = A2(
+					_elm_lang$core$Maybe$map,
+					function (_) {
+						return _.url;
+					},
+					A2(
+						_elm_lang$core$Array$get,
+						_p2._0,
+						_elm_lang$core$Array$fromList(model.photos)));
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{selectedUrl: newSelectedUrl}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'SurpriseMe':
+				var randomPhotoPicker = A2(
+					_elm_lang$core$Random$int,
+					0,
+					_elm_lang$core$List$length(model.photos) - 1);
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: A2(_elm_lang$core$Random$generate, _user$project$PhotoGallery$SelectByIndex, randomPhotoPicker)
+				};
+			default:
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{chosenSize: _p2._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+		}
+	});
 var _user$project$PhotoGallery$SelectByUrl = function (a) {
 	return {ctor: 'SelectByUrl', _0: a};
 };
@@ -9096,7 +9170,9 @@ var _user$project$PhotoGallery$viewThumbnail = F2(
 							_0: {
 								ctor: '_Tuple2',
 								_0: 'selected',
-								_1: _elm_lang$core$Native_Utils.eq(selectedUrl, thumbnail.url)
+								_1: _elm_lang$core$Native_Utils.eq(
+									selectedUrl,
+									_elm_lang$core$Maybe$Just(thumbnail.url))
 							},
 							_1: {ctor: '[]'}
 						}),
@@ -9113,73 +9189,11 @@ var _user$project$PhotoGallery$viewThumbnail = F2(
 var _user$project$PhotoGallery$Large = {ctor: 'Large'};
 var _user$project$PhotoGallery$Medium = {ctor: 'Medium'};
 var _user$project$PhotoGallery$model = {
-	photos: {
-		ctor: '::',
-		_0: {url: '1.jpeg'},
-		_1: {
-			ctor: '::',
-			_0: {url: '2.jpeg'},
-			_1: {
-				ctor: '::',
-				_0: {url: '3.jpeg'},
-				_1: {ctor: '[]'}
-			}
-		}
-	},
-	selectedUrl: '1.jpeg',
+	photos: {ctor: '[]'},
+	selectedUrl: _elm_lang$core$Maybe$Nothing,
+	loadingError: _elm_lang$core$Maybe$Nothing,
 	chosenSize: _user$project$PhotoGallery$Medium
 };
-var _user$project$PhotoGallery$photoArray = _elm_lang$core$Array$fromList(_user$project$PhotoGallery$model.photos);
-var _user$project$PhotoGallery$getPhotoUrl = function (index) {
-	var _p1 = A2(_elm_lang$core$Array$get, index, _user$project$PhotoGallery$photoArray);
-	if (_p1.ctor === 'Just') {
-		return _p1._0.url;
-	} else {
-		return '';
-	}
-};
-var _user$project$PhotoGallery$randomPhotoPicker = A2(
-	_elm_lang$core$Random$int,
-	0,
-	_elm_lang$core$Array$length(_user$project$PhotoGallery$photoArray) - 1);
-var _user$project$PhotoGallery$update = F2(
-	function (msg, model) {
-		var _p2 = msg;
-		switch (_p2.ctor) {
-			case 'SelectByUrl':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{selectedUrl: _p2._0}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'SelectByIndex':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							selectedUrl: _user$project$PhotoGallery$getPhotoUrl(_p2._0)
-						}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'SurpriseMe':
-				return {
-					ctor: '_Tuple2',
-					_0: model,
-					_1: A2(_elm_lang$core$Random$generate, _user$project$PhotoGallery$SelectByIndex, _user$project$PhotoGallery$randomPhotoPicker)
-				};
-			default:
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{chosenSize: _p2._0}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-		}
-	});
 var _user$project$PhotoGallery$viewSizeChooser = function (size) {
 	return A2(
 		_elm_lang$html$Html$label,
@@ -9304,22 +9318,7 @@ var _user$project$PhotoGallery$view = function (model) {
 									model.photos)),
 							_1: {
 								ctor: '::',
-								_0: A2(
-									_elm_lang$html$Html$img,
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html_Attributes$class('large'),
-										_1: {
-											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$src(
-												A2(
-													_elm_lang$core$Basics_ops['++'],
-													_user$project$PhotoGallery$urlPrefix,
-													A2(_elm_lang$core$Basics_ops['++'], 'large/', model.selectedUrl))),
-											_1: {ctor: '[]'}
-										}
-									},
-									{ctor: '[]'}),
+								_0: _user$project$PhotoGallery$viewLarge(model.selectedUrl),
 								_1: {ctor: '[]'}
 							}
 						}
