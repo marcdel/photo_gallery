@@ -1,4 +1,4 @@
-module PhotoGroove exposing (..)
+module PhotoGallery exposing (..)
 
 import Array exposing (Array)
 import Html exposing (..)
@@ -56,7 +56,7 @@ urlPrefix =
 view : Model -> Html Msg
 view model =
     div [ class "content" ]
-        [ h1 [] [ text "Photo Groove" ]
+        [ h1 [] [ text "Photo Gallery" ]
         , button
             [ onClick SurpriseMe ]
             [ text "Surprise Me!" ]
@@ -137,6 +137,7 @@ update msg model =
             ( { model | chosenSize = size }, Cmd.none )
 
 
+main : Program Never Model Msg
 main =
     Html.program
         { init = ( model, Cmd.none )
