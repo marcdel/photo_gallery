@@ -2,14 +2,19 @@ module PhotoGallery exposing (..)
 
 import Array exposing (Array)
 import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html.Attributes exposing (id, checked, class, classList, src, name, type_, title)
 import Html.Events exposing (onClick)
 import Http
+import Json.Decode exposing (string, int, list, Decoder)
+import Json.Decode.Pipeline exposing (decode, required, optional)
 import Random
 
 
 type alias Photo =
-    { url : String }
+    { url : String
+    , size : Int
+    , title : String
+    }
 
 
 type alias Model =
@@ -25,7 +30,7 @@ type Msg
     | SelectByIndex Int
     | SurpriseMe
     | SetSize ThumbnailSize
-    | LoadPhotos (Result Http.Error String)
+    | LoadPhotos (Result Http.Error (List Photo))
 
 
 type ThumbnailSize
@@ -43,9 +48,30 @@ model =
     }
 
 
+photoDecoder : Decoder Photo
+photoDecoder =
+    decode Photo
+        |> required "url" string
+        |> required "size" int
+        |> optional "title" string "(untitled)"
+
+
 urlPrefix : String
 urlPrefix =
     "http://elm-in-action.com/"
+
+
+viewOrError : Model -> Html Msg
+viewOrError model =
+    case model.loadingError of
+        Nothing ->
+            view model
+
+        Just errorMessage ->
+            div [ class "error-message" ]
+                [ h1 [] [ text "Photo Gallery" ]
+                , p [] [ text errorMessage ]
+                ]
 
 
 view : Model -> Html Msg
@@ -109,8 +135,8 @@ sizeToString size =
 
 loadPhotosCmd : Cmd Msg
 loadPhotosCmd =
-    (urlPrefix ++ "photos/list")
-        |> Http.getString
+    list photoDecoder
+        |> Http.get (urlPrefix ++ "photos/list.json")
         |> Http.send LoadPhotos
 
 
@@ -141,25 +167,27 @@ update msg model =
         SetSize size ->
             ( { model | chosenSize = size }, Cmd.none )
 
-        LoadPhotos (Ok responseStr) ->
-            let
-                urls =
-                    String.split "," responseStr
-
-                photos =
-                    List.map Photo urls
-            in
-                ( { model | photos = photos, selectedUrl = List.head urls }, Cmd.none )
+        LoadPhotos (Ok photos) ->
+            ( { model
+                | photos = photos
+                , selectedUrl = Maybe.map .url (List.head photos)
+              }
+            , Cmd.none
+            )
 
         LoadPhotos (Err _) ->
-            ( model, Cmd.none )
+            ( { model
+                | loadingError = Just "Error! (Try turning it off and on again?)"
+              }
+            , Cmd.none
+            )
 
 
 main : Program Never Model Msg
 main =
     Html.program
         { init = ( model, loadPhotosCmd )
-        , view = view
+        , view = viewOrError
         , update = update
         , subscriptions = (\_ -> Sub.none)
         }
