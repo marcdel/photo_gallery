@@ -9659,23 +9659,37 @@ var _user$project$PhotoGallery$viewThumbnail = F2(
 					A2(_elm_lang$core$Basics_ops['++'], _user$project$PhotoGallery$urlPrefix, thumbnail.url)),
 				_1: {
 					ctor: '::',
-					_0: _elm_lang$html$Html_Attributes$classList(
-						{
-							ctor: '::',
-							_0: {
-								ctor: '_Tuple2',
-								_0: 'selected',
-								_1: _elm_lang$core$Native_Utils.eq(
-									selectedUrl,
-									_elm_lang$core$Maybe$Just(thumbnail.url))
-							},
-							_1: {ctor: '[]'}
-						}),
+					_0: _elm_lang$html$Html_Attributes$title(
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							thumbnail.title,
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								' [',
+								A2(
+									_elm_lang$core$Basics_ops['++'],
+									_elm_lang$core$Basics$toString(thumbnail.size),
+									' Kb]')))),
 					_1: {
 						ctor: '::',
-						_0: _elm_lang$html$Html_Events$onClick(
-							_user$project$PhotoGallery$SelectByUrl(thumbnail.url)),
-						_1: {ctor: '[]'}
+						_0: _elm_lang$html$Html_Attributes$classList(
+							{
+								ctor: '::',
+								_0: {
+									ctor: '_Tuple2',
+									_0: 'selected',
+									_1: _elm_lang$core$Native_Utils.eq(
+										selectedUrl,
+										_elm_lang$core$Maybe$Just(thumbnail.url))
+								},
+								_1: {ctor: '[]'}
+							}),
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$html$Html_Events$onClick(
+								_user$project$PhotoGallery$SelectByUrl(thumbnail.url)),
+							_1: {ctor: '[]'}
+						}
 					}
 				}
 			},

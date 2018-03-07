@@ -94,6 +94,7 @@ viewThumbnail : Maybe String -> Photo -> Html Msg
 viewThumbnail selectedUrl thumbnail =
     img
         [ src (urlPrefix ++ thumbnail.url)
+        , title (thumbnail.title ++ " [" ++ toString thumbnail.size ++ " Kb]")
         , classList [ ( "selected", selectedUrl == Just thumbnail.url ) ]
         , onClick (SelectByUrl thumbnail.url)
         ]
