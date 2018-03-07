@@ -2,10 +2,10 @@ module PhotoGallery exposing (..)
 
 import Array exposing (Array)
 import Html exposing (..)
-import Html.Attributes exposing (id, checked, class, classList, src, name, type_, title)
-import Html.Events exposing (onClick)
+import Html.Attributes as Attr exposing (id, checked, class, classList, src, max, name, type_, title)
+import Html.Events exposing (onClick, on)
 import Http
-import Json.Decode exposing (string, int, list, Decoder)
+import Json.Decode exposing (string, int, list, Decoder, at)
 import Json.Decode.Pipeline exposing (decode, required, optional)
 import Random
 
@@ -22,6 +22,9 @@ type alias Model =
     , selectedUrl : Maybe String
     , loadingError : Maybe String
     , chosenSize : ThumbnailSize
+    , hue : Int
+    , ripple : Int
+    , noise : Int
     }
 
 
@@ -31,6 +34,9 @@ type Msg
     | SurpriseMe
     | SetSize ThumbnailSize
     | LoadPhotos (Result Http.Error (List Photo))
+    | SetHue Int
+    | SetRipple Int
+    | SetNoise Int
 
 
 type ThumbnailSize
@@ -45,6 +51,9 @@ model =
     , selectedUrl = Nothing
     , loadingError = Nothing
     , chosenSize = Medium
+    , hue = 0
+    , ripple = 0
+    , noise = 0
     }
 
 
@@ -81,6 +90,11 @@ view model =
         , button
             [ onClick SurpriseMe ]
             [ text "Surprise Me!" ]
+        , div [ class "filters" ]
+            [ viewFilter "Hue" SetHue model.hue
+            , viewFilter "Ripple" SetRipple model.ripple
+            , viewFilter "Noise" SetNoise model.noise
+            ]
         , h3 [] [ text "Thumbnail Size:" ]
         , div [ id "choose-size" ]
             (List.map viewSizeChooser [ Small, Medium, Large ])
@@ -121,6 +135,20 @@ viewSizeChooser size =
         ]
 
 
+viewFilter : String -> (Int -> Msg) -> Int -> Html Msg
+viewFilter name toMsg magnitude =
+    div [ class "filter-slider" ]
+        [ label [] [ text name ]
+        , paperSlider [ Attr.max "11", onImmediateValueChange toMsg ] []
+        , label [] [ text (toString magnitude) ]
+        ]
+
+
+paperSlider : List (Attribute msg) -> List (Html msg) -> Html msg
+paperSlider =
+    node "paper-slider"
+
+
 sizeToString : ThumbnailSize -> String
 sizeToString size =
     case size of
@@ -139,6 +167,13 @@ loadPhotosCmd =
     list photoDecoder
         |> Http.get (urlPrefix ++ "photos/list.json")
         |> Http.send LoadPhotos
+
+
+onImmediateValueChange : (Int -> msg) -> Attribute msg
+onImmediateValueChange toMsg =
+    at [ "target", "immediateValue" ] int
+        |> Json.Decode.map toMsg
+        |> on "immediate-value-changed"
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -182,6 +217,15 @@ update msg model =
               }
             , Cmd.none
             )
+
+        SetHue hue ->
+            ( { model | hue = hue }, Cmd.none )
+
+        SetRipple ripple ->
+            ( { model | ripple = ripple }, Cmd.none )
+
+        SetNoise noise ->
+            ( { model | noise = noise }, Cmd.none )
 
 
 main : Program Never Model Msg
