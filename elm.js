@@ -9643,6 +9643,7 @@ var _user$project$PhotoGallery$applyFilters = function (model) {
 		return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 	}
 };
+var _user$project$PhotoGallery$statusChanges = _elm_lang$core$Native_Platform.incomingPort('statusChanges', _elm_lang$core$Json_Decode$string);
 var _user$project$PhotoGallery$Photo = F3(
 	function (a, b, c) {
 		return {url: a, size: b, title: c};
@@ -9665,9 +9666,9 @@ var _user$project$PhotoGallery$FilterOptions = F2(
 	function (a, b) {
 		return {url: a, filters: b};
 	});
-var _user$project$PhotoGallery$Model = F7(
-	function (a, b, c, d, e, f, g) {
-		return {photos: a, selectedUrl: b, loadingError: c, chosenSize: d, hue: e, ripple: f, noise: g};
+var _user$project$PhotoGallery$Model = F8(
+	function (a, b, c, d, e, f, g, h) {
+		return {photos: a, status: b, selectedUrl: c, loadingError: d, chosenSize: e, hue: f, ripple: g, noise: h};
 	});
 var _user$project$PhotoGallery$SetNoise = function (a) {
 	return {ctor: 'SetNoise', _0: a};
@@ -9692,6 +9693,9 @@ var _user$project$PhotoGallery$SetSize = function (a) {
 	return {ctor: 'SetSize', _0: a};
 };
 var _user$project$PhotoGallery$SurpriseMe = {ctor: 'SurpriseMe'};
+var _user$project$PhotoGallery$SetStatus = function (a) {
+	return {ctor: 'SetStatus', _0: a};
+};
 var _user$project$PhotoGallery$SelectByIndex = function (a) {
 	return {ctor: 'SelectByIndex', _0: a};
 };
@@ -9699,6 +9703,14 @@ var _user$project$PhotoGallery$update = F2(
 	function (msg, model) {
 		var _p3 = msg;
 		switch (_p3.ctor) {
+			case 'SetStatus':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{status: _p3._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
 			case 'SelectByUrl':
 				return _user$project$PhotoGallery$applyFilters(
 					_elm_lang$core$Native_Utils.update(
@@ -9834,6 +9846,7 @@ var _user$project$PhotoGallery$Large = {ctor: 'Large'};
 var _user$project$PhotoGallery$Medium = {ctor: 'Medium'};
 var _user$project$PhotoGallery$model = {
 	photos: {ctor: '[]'},
+	status: '',
 	selectedUrl: _elm_lang$core$Maybe$Nothing,
 	loadingError: _elm_lang$core$Maybe$Nothing,
 	chosenSize: _user$project$PhotoGallery$Medium,
@@ -9916,79 +9929,94 @@ var _user$project$PhotoGallery$view = function (model) {
 						_elm_lang$html$Html$div,
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$class('filters'),
+							_0: _elm_lang$html$Html_Attributes$class('status'),
 							_1: {ctor: '[]'}
 						},
 						{
 							ctor: '::',
-							_0: A3(_user$project$PhotoGallery$viewFilter, 'Hue', _user$project$PhotoGallery$SetHue, model.hue),
-							_1: {
-								ctor: '::',
-								_0: A3(_user$project$PhotoGallery$viewFilter, 'Ripple', _user$project$PhotoGallery$SetRipple, model.ripple),
-								_1: {
-									ctor: '::',
-									_0: A3(_user$project$PhotoGallery$viewFilter, 'Noise', _user$project$PhotoGallery$SetNoise, model.noise),
-									_1: {ctor: '[]'}
-								}
-							}
+							_0: _elm_lang$html$Html$text(model.status),
+							_1: {ctor: '[]'}
 						}),
 					_1: {
 						ctor: '::',
 						_0: A2(
-							_elm_lang$html$Html$h3,
-							{ctor: '[]'},
+							_elm_lang$html$Html$div,
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html$text('Thumbnail Size:'),
+								_0: _elm_lang$html$Html_Attributes$class('filters'),
 								_1: {ctor: '[]'}
+							},
+							{
+								ctor: '::',
+								_0: A3(_user$project$PhotoGallery$viewFilter, 'Hue', _user$project$PhotoGallery$SetHue, model.hue),
+								_1: {
+									ctor: '::',
+									_0: A3(_user$project$PhotoGallery$viewFilter, 'Ripple', _user$project$PhotoGallery$SetRipple, model.ripple),
+									_1: {
+										ctor: '::',
+										_0: A3(_user$project$PhotoGallery$viewFilter, 'Noise', _user$project$PhotoGallery$SetNoise, model.noise),
+										_1: {ctor: '[]'}
+									}
+								}
 							}),
 						_1: {
 							ctor: '::',
 							_0: A2(
-								_elm_lang$html$Html$div,
+								_elm_lang$html$Html$h3,
+								{ctor: '[]'},
 								{
 									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$id('choose-size'),
+									_0: _elm_lang$html$Html$text('Thumbnail Size:'),
 									_1: {ctor: '[]'}
-								},
-								A2(
-									_elm_lang$core$List$map,
-									_user$project$PhotoGallery$viewSizeChooser,
-									{
-										ctor: '::',
-										_0: _user$project$PhotoGallery$Small,
-										_1: {
-											ctor: '::',
-											_0: _user$project$PhotoGallery$Medium,
-											_1: {
-												ctor: '::',
-												_0: _user$project$PhotoGallery$Large,
-												_1: {ctor: '[]'}
-											}
-										}
-									})),
+								}),
 							_1: {
 								ctor: '::',
 								_0: A2(
 									_elm_lang$html$Html$div,
 									{
 										ctor: '::',
-										_0: _elm_lang$html$Html_Attributes$id('thumbnails'),
-										_1: {
-											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$class(
-												_user$project$PhotoGallery$sizeToString(model.chosenSize)),
-											_1: {ctor: '[]'}
-										}
+										_0: _elm_lang$html$Html_Attributes$id('choose-size'),
+										_1: {ctor: '[]'}
 									},
 									A2(
 										_elm_lang$core$List$map,
-										_user$project$PhotoGallery$viewThumbnail(model.selectedUrl),
-										model.photos)),
+										_user$project$PhotoGallery$viewSizeChooser,
+										{
+											ctor: '::',
+											_0: _user$project$PhotoGallery$Small,
+											_1: {
+												ctor: '::',
+												_0: _user$project$PhotoGallery$Medium,
+												_1: {
+													ctor: '::',
+													_0: _user$project$PhotoGallery$Large,
+													_1: {ctor: '[]'}
+												}
+											}
+										})),
 								_1: {
 									ctor: '::',
-									_0: _user$project$PhotoGallery$viewLarge(model.selectedUrl),
-									_1: {ctor: '[]'}
+									_0: A2(
+										_elm_lang$html$Html$div,
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$id('thumbnails'),
+											_1: {
+												ctor: '::',
+												_0: _elm_lang$html$Html_Attributes$class(
+													_user$project$PhotoGallery$sizeToString(model.chosenSize)),
+												_1: {ctor: '[]'}
+											}
+										},
+										A2(
+											_elm_lang$core$List$map,
+											_user$project$PhotoGallery$viewThumbnail(model.selectedUrl),
+											model.photos)),
+									_1: {
+										ctor: '::',
+										_0: _user$project$PhotoGallery$viewLarge(model.selectedUrl),
+										_1: {ctor: '[]'}
+									}
 								}
 							}
 						}
@@ -10040,7 +10068,7 @@ var _user$project$PhotoGallery$main = _elm_lang$html$Html$program(
 		view: _user$project$PhotoGallery$viewOrError,
 		update: _user$project$PhotoGallery$update,
 		subscriptions: function (_p6) {
-			return _elm_lang$core$Platform_Sub$none;
+			return _user$project$PhotoGallery$statusChanges(_user$project$PhotoGallery$SetStatus);
 		}
 	})();
 

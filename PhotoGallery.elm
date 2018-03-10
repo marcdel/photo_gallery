@@ -20,6 +20,9 @@ type alias Photo =
 port setFilters : FilterOptions -> Cmd msg
 
 
+port statusChanges : (String -> msg) -> Sub msg
+
+
 type alias FilterOptions =
     { url : String
     , filters : List { name : String, amount : Float }
@@ -28,6 +31,7 @@ type alias FilterOptions =
 
 type alias Model =
     { photos : List Photo
+    , status : String
     , selectedUrl : Maybe String
     , loadingError : Maybe String
     , chosenSize : ThumbnailSize
@@ -40,6 +44,7 @@ type alias Model =
 type Msg
     = SelectByUrl String
     | SelectByIndex Int
+    | SetStatus String
     | SurpriseMe
     | SetSize ThumbnailSize
     | LoadPhotos (Result Http.Error (List Photo))
@@ -57,6 +62,7 @@ type ThumbnailSize
 model : Model
 model =
     { photos = []
+    , status = ""
     , selectedUrl = Nothing
     , loadingError = Nothing
     , chosenSize = Medium
@@ -99,6 +105,7 @@ view model =
         , button
             [ onClick SurpriseMe ]
             [ text "Surprise Me!" ]
+        , div [ class "status" ] [ text model.status ]
         , div [ class "filters" ]
             [ viewFilter "Hue" SetHue model.hue
             , viewFilter "Ripple" SetRipple model.ripple
@@ -188,6 +195,9 @@ onImmediateValueChange toMsg =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        SetStatus status ->
+            ( { model | status = status }, Cmd.none )
+
         SelectByUrl selectedUrl ->
             applyFilters { model | selectedUrl = Just selectedUrl }
 
@@ -262,5 +272,5 @@ main =
         { init = ( model, loadPhotosCmd )
         , view = viewOrError
         , update = update
-        , subscriptions = (\_ -> Sub.none)
+        , subscriptions = (\_ -> statusChanges SetStatus)
         }

@@ -12,8 +12,11 @@
     <script src="elm.js"></script>
     <script>
       const app = Elm.PhotoGallery.embed(document.getElementById("elm-area"));
+
       // requestAnimationFrame runs the callback after `view` results in a DOM update
       app.ports.setFilters.subscribe(options => requestAnimationFrame(() => Pasta.apply(document.getElementById("main-canvas"), options)));
+
+      Pasta.addStatusListener(status => app.ports.statusChanges.send(status));
     </script>
   </body>
 </html>
