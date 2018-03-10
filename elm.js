@@ -9573,28 +9573,74 @@ var _user$project$PhotoGallery$viewFilter = F3(
 				}
 			});
 	});
-var _user$project$PhotoGallery$urlPrefix = 'http://elm-in-action.com/';
 var _user$project$PhotoGallery$viewLarge = function (maybeUrl) {
 	var _p1 = maybeUrl;
 	if (_p1.ctor === 'Nothing') {
 		return _elm_lang$html$Html$text('');
 	} else {
 		return A2(
-			_elm_lang$html$Html$img,
+			_elm_lang$html$Html$canvas,
 			{
 				ctor: '::',
-				_0: _elm_lang$html$Html_Attributes$class('large'),
+				_0: _elm_lang$html$Html_Attributes$id('main-canvas'),
 				_1: {
 					ctor: '::',
-					_0: _elm_lang$html$Html_Attributes$src(
-						A2(
-							_elm_lang$core$Basics_ops['++'],
-							_user$project$PhotoGallery$urlPrefix,
-							A2(_elm_lang$core$Basics_ops['++'], 'large/', _p1._0))),
+					_0: _elm_lang$html$Html_Attributes$class('large'),
 					_1: {ctor: '[]'}
 				}
 			},
 			{ctor: '[]'});
+	}
+};
+var _user$project$PhotoGallery$urlPrefix = 'http://elm-in-action.com/';
+var _user$project$PhotoGallery$setFilters = _elm_lang$core$Native_Platform.outgoingPort(
+	'setFilters',
+	function (v) {
+		return {
+			url: v.url,
+			filters: _elm_lang$core$Native_List.toArray(v.filters).map(
+				function (v) {
+					return {name: v.name, amount: v.amount};
+				})
+		};
+	});
+var _user$project$PhotoGallery$applyFilters = function (model) {
+	var _p2 = model.selectedUrl;
+	if (_p2.ctor === 'Just') {
+		var url = A2(
+			_elm_lang$core$Basics_ops['++'],
+			_user$project$PhotoGallery$urlPrefix,
+			A2(_elm_lang$core$Basics_ops['++'], 'large/', _p2._0));
+		var filters = {
+			ctor: '::',
+			_0: {
+				name: 'Hue',
+				amount: _elm_lang$core$Basics$toFloat(model.hue) / 11
+			},
+			_1: {
+				ctor: '::',
+				_0: {
+					name: 'Ripple',
+					amount: _elm_lang$core$Basics$toFloat(model.ripple) / 11
+				},
+				_1: {
+					ctor: '::',
+					_0: {
+						name: 'Noise',
+						amount: _elm_lang$core$Basics$toFloat(model.noise) / 11
+					},
+					_1: {ctor: '[]'}
+				}
+			}
+		};
+		return {
+			ctor: '_Tuple2',
+			_0: model,
+			_1: _user$project$PhotoGallery$setFilters(
+				{url: url, filters: filters})
+		};
+	} else {
+		return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 	}
 };
 var _user$project$PhotoGallery$Photo = F3(
@@ -9615,6 +9661,10 @@ var _user$project$PhotoGallery$photoDecoder = A4(
 			'url',
 			_elm_lang$core$Json_Decode$string,
 			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$PhotoGallery$Photo))));
+var _user$project$PhotoGallery$FilterOptions = F2(
+	function (a, b) {
+		return {url: a, filters: b};
+	});
 var _user$project$PhotoGallery$Model = F7(
 	function (a, b, c, d, e, f, g) {
 		return {photos: a, selectedUrl: b, loadingError: c, chosenSize: d, hue: e, ripple: f, noise: g};
@@ -9647,18 +9697,15 @@ var _user$project$PhotoGallery$SelectByIndex = function (a) {
 };
 var _user$project$PhotoGallery$update = F2(
 	function (msg, model) {
-		var _p2 = msg;
-		switch (_p2.ctor) {
+		var _p3 = msg;
+		switch (_p3.ctor) {
 			case 'SelectByUrl':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
+				return _user$project$PhotoGallery$applyFilters(
+					_elm_lang$core$Native_Utils.update(
 						model,
 						{
-							selectedUrl: _elm_lang$core$Maybe$Just(_p2._0)
-						}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
+							selectedUrl: _elm_lang$core$Maybe$Just(_p3._0)
+						}));
 			case 'SelectByIndex':
 				var newSelectedUrl = A2(
 					_elm_lang$core$Maybe$map,
@@ -9667,15 +9714,12 @@ var _user$project$PhotoGallery$update = F2(
 					},
 					A2(
 						_elm_lang$core$Array$get,
-						_p2._0,
+						_p3._0,
 						_elm_lang$core$Array$fromList(model.photos)));
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
+				return _user$project$PhotoGallery$applyFilters(
+					_elm_lang$core$Native_Utils.update(
 						model,
-						{selectedUrl: newSelectedUrl}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
+						{selectedUrl: newSelectedUrl}));
 			case 'SurpriseMe':
 				var randomPhotoPicker = A2(
 					_elm_lang$core$Random$int,
@@ -9691,27 +9735,24 @@ var _user$project$PhotoGallery$update = F2(
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{chosenSize: _p2._0}),
+						{chosenSize: _p3._0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'LoadPhotos':
-				if (_p2._0.ctor === 'Ok') {
-					var _p3 = _p2._0._0;
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
+				if (_p3._0.ctor === 'Ok') {
+					var _p4 = _p3._0._0;
+					return _user$project$PhotoGallery$applyFilters(
+						_elm_lang$core$Native_Utils.update(
 							model,
 							{
-								photos: _p3,
+								photos: _p4,
 								selectedUrl: A2(
 									_elm_lang$core$Maybe$map,
 									function (_) {
 										return _.url;
 									},
-									_elm_lang$core$List$head(_p3))
-							}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
+									_elm_lang$core$List$head(_p4))
+							}));
 				} else {
 					return {
 						ctor: '_Tuple2',
@@ -9724,29 +9765,20 @@ var _user$project$PhotoGallery$update = F2(
 					};
 				}
 			case 'SetHue':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
+				return _user$project$PhotoGallery$applyFilters(
+					_elm_lang$core$Native_Utils.update(
 						model,
-						{hue: _p2._0}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
+						{hue: _p3._0}));
 			case 'SetRipple':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
+				return _user$project$PhotoGallery$applyFilters(
+					_elm_lang$core$Native_Utils.update(
 						model,
-						{ripple: _p2._0}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
+						{ripple: _p3._0}));
 			default:
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
+				return _user$project$PhotoGallery$applyFilters(
+					_elm_lang$core$Native_Utils.update(
 						model,
-						{noise: _p2._0}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
+						{noise: _p3._0}));
 		}
 	});
 var _user$project$PhotoGallery$SelectByUrl = function (a) {
@@ -9966,8 +9998,8 @@ var _user$project$PhotoGallery$view = function (model) {
 		});
 };
 var _user$project$PhotoGallery$viewOrError = function (model) {
-	var _p4 = model.loadingError;
-	if (_p4.ctor === 'Nothing') {
+	var _p5 = model.loadingError;
+	if (_p5.ctor === 'Nothing') {
 		return _user$project$PhotoGallery$view(model);
 	} else {
 		return A2(
@@ -9994,7 +10026,7 @@ var _user$project$PhotoGallery$viewOrError = function (model) {
 						{ctor: '[]'},
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html$text(_p4._0),
+							_0: _elm_lang$html$Html$text(_p5._0),
 							_1: {ctor: '[]'}
 						}),
 					_1: {ctor: '[]'}
@@ -10007,7 +10039,7 @@ var _user$project$PhotoGallery$main = _elm_lang$html$Html$program(
 		init: {ctor: '_Tuple2', _0: _user$project$PhotoGallery$model, _1: _user$project$PhotoGallery$loadPhotosCmd},
 		view: _user$project$PhotoGallery$viewOrError,
 		update: _user$project$PhotoGallery$update,
-		subscriptions: function (_p5) {
+		subscriptions: function (_p6) {
 			return _elm_lang$core$Platform_Sub$none;
 		}
 	})();
