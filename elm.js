@@ -9890,6 +9890,19 @@ var _user$project$PhotoGallery$viewSizeChooser = function (size) {
 			}
 		});
 };
+var _user$project$PhotoGallery$init = function (flags) {
+	var status = A2(
+		_elm_lang$core$Basics_ops['++'],
+		'Initializing Pasta v',
+		_elm_lang$core$Basics$toString(flags));
+	return {
+		ctor: '_Tuple2',
+		_0: _elm_lang$core$Native_Utils.update(
+			_user$project$PhotoGallery$model,
+			{status: status}),
+		_1: _user$project$PhotoGallery$loadPhotosCmd
+	};
+};
 var _user$project$PhotoGallery$Small = {ctor: 'Small'};
 var _user$project$PhotoGallery$view = function (model) {
 	return A2(
@@ -10062,15 +10075,15 @@ var _user$project$PhotoGallery$viewOrError = function (model) {
 			});
 	}
 };
-var _user$project$PhotoGallery$main = _elm_lang$html$Html$program(
+var _user$project$PhotoGallery$main = _elm_lang$html$Html$programWithFlags(
 	{
-		init: {ctor: '_Tuple2', _0: _user$project$PhotoGallery$model, _1: _user$project$PhotoGallery$loadPhotosCmd},
+		init: _user$project$PhotoGallery$init,
 		view: _user$project$PhotoGallery$viewOrError,
 		update: _user$project$PhotoGallery$update,
 		subscriptions: function (_p6) {
 			return _user$project$PhotoGallery$statusChanges(_user$project$PhotoGallery$SetStatus);
 		}
-	})();
+	})(_elm_lang$core$Json_Decode$float);
 
 var Elm = {};
 Elm['PhotoGallery'] = Elm['PhotoGallery'] || {};

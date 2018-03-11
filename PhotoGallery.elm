@@ -266,10 +266,19 @@ applyFilters model =
             ( model, Cmd.none )
 
 
-main : Program Never Model Msg
+init : Float -> ( Model, Cmd Msg )
+init flags =
+    let
+        status =
+            "Initializing Pasta v" ++ toString flags
+    in
+        ( { model | status = status }, loadPhotosCmd )
+
+
+main : Program Float Model Msg
 main =
-    Html.program
-        { init = ( model, loadPhotosCmd )
+    Html.programWithFlags
+        { init = init
         , view = viewOrError
         , update = update
         , subscriptions = (\_ -> statusChanges SetStatus)
