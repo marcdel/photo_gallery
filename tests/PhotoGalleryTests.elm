@@ -4,6 +4,7 @@ import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
 import Html.Attributes as Attr
 import Test exposing (..)
+import Test.Html.Event as Event
 import Test.Html.Query as Query
 import Test.Html.Selector exposing (text, tag, attribute)
 import PhotoGallery exposing (..)
@@ -61,22 +62,52 @@ doesNotRenderThumbnailsWhenListIsEmpty =
 
 rendersEachThumbnailInTheList : Test
 rendersEachThumbnailInTheList =
-    fuzz (Fuzz.intRange 1 5) "URLs render as thumbnails" <|
-        \urlCount ->
+    fuzz urlFuzzer "URLs render as thumbnails" <|
+        \urls ->
             let
                 thumbnailChecks : List (Query.Single msg -> Expectation)
                 thumbnailChecks =
                     List.map thumbnailRendered urls
-
-                urls : List String
-                urls =
-                    List.range 1 urlCount
-                        |> List.map (\num -> toString num ++ ".png")
             in
                 { model | photos = List.map photoFromUrl urls }
                     |> PhotoGallery.view
                     |> Query.fromHtml
                     |> Expect.all thumbnailChecks
+
+
+clickThumbnail : Test
+clickThumbnail =
+    fuzz3 urlFuzzer string urlFuzzer "clicking a thumbnail selects it" <|
+        \urlsBefore urlToClick urlsAfter ->
+            let
+                url =
+                    urlToClick ++ ".jpeg"
+
+                photos =
+                    (urlsBefore ++ url :: urlsAfter)
+                        |> List.map photoFromUrl
+
+                srcToClick =
+                    urlPrefix ++ url
+            in
+                { model | photos = photos }
+                    |> PhotoGallery.view
+                    |> Query.fromHtml
+                    |> Query.find [ tag "img", attribute <| Attr.src (srcToClick) ]
+                    |> Event.simulate Event.click
+                    |> Event.expect (SelectByUrl url)
+
+
+urlFuzzer : Fuzzer (List String)
+urlFuzzer =
+    Fuzz.intRange 1 5
+        |> Fuzz.map urlsFromCount
+
+
+urlsFromCount : Int -> List String
+urlsFromCount urlCount =
+    List.range 1 urlCount
+        |> List.map (\num -> toString num ++ ".png")
 
 
 thumbnailRendered : String -> Query.Single msg -> Expectation
